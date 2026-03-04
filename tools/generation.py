@@ -3,6 +3,7 @@
 import copy
 import inspect
 import logging
+import os
 import random
 from typing import Any, Dict, Optional
 
@@ -68,6 +69,27 @@ def register_workflow_generation_tools(
                     # Unknown parameter, pass through
                     coerced_kwargs[key] = value
             
+            # Pre-process image parameters: upload local files to ComfyUI
+            for key, value in list(coerced_kwargs.items()):
+                if value is None or not isinstance(value, str):
+                    continue
+                param = param_dict.get(key)
+                if not param:
+                    continue
+                # Check if this parameter is bound to a LoadImage node
+                for node_id, input_name in param.bindings:
+                    node = definition.template.get(node_id, {})
+                    if node.get("class_type") == "LoadImage" and input_name == "image":
+                        # If the value is an existing file path, upload it
+                        expanded = os.path.expanduser(value)
+                        if os.path.isfile(expanded):
+                            try:
+                                coerced_kwargs[key] = comfyui_client.upload_image(expanded)
+                            except Exception as e:
+                                logger.error("Failed to upload image %s: %s", value, e)
+                                return {"error": f"Failed to upload image: {e}"}
+                        break
+
             bound = _tool_impl.__signature__.bind(*args, **coerced_kwargs)
             bound.apply_defaults()
             

@@ -1,3 +1,4 @@
+import os
 import requests
 import json
 import time
@@ -54,6 +55,34 @@ class ComfyUIClient:
         except requests.RequestException as e:
             logger.warning(f"Error fetching models: {e}")
             return []
+
+    def upload_image(self, file_path: str) -> str:
+        """Upload an image file to ComfyUI's input directory.
+
+        Args:
+            file_path: Path to the image file.
+
+        Returns:
+            The filename as stored in ComfyUI's input directory.
+        """
+        file_path = os.path.expanduser(file_path)
+        if not os.path.isfile(file_path):
+            raise FileNotFoundError(f"Image file not found: {file_path}")
+
+        filename = os.path.basename(file_path)
+        with open(file_path, "rb") as f:
+            resp = requests.post(
+                f"{self.base_url}/upload/image",
+                files={"image": (filename, f)},
+                data={"overwrite": "true"},
+                timeout=30,
+            )
+        if resp.status_code != 200:
+            raise Exception(f"Failed to upload image: {resp.status_code} - {resp.text}")
+        result = resp.json()
+        uploaded_name = result.get("name", filename)
+        logger.info("Uploaded image '%s' as '%s'", file_path, uploaded_name)
+        return uploaded_name
 
     def run_custom_workflow(self, workflow: Dict[str, Any], preferred_output_keys: Sequence[str] | None = None, max_attempts: int = 30):
         if preferred_output_keys is None:
