@@ -40,6 +40,8 @@ PLACEHOLDER_DESCRIPTIONS = {
     "duration": "Video duration in seconds. Default: 5.",
     "fps": "Frames per second for video output. Default: 16.",
     "image": "Input image. Accepts a local file path (will be uploaded to ComfyUI) or a filename already in ComfyUI's input directory.",
+    "image2": "Optional second reference image. Accepts a local file path or a filename in ComfyUI's input directory.",
+    "image3": "Optional third reference image. Accepts a local file path or a filename in ComfyUI's input directory.",
 }
 DEFAULT_OUTPUT_KEYS = ("images", "image", "gifs", "gif")
 AUDIO_OUTPUT_KEYS = ("audio", "audios", "sound", "files")
@@ -240,12 +242,45 @@ class WorkflowManager:
         # Apply defaults for parameters not in overrides
         for param_name, param in parameters.items():
             if param_name not in overrides and not param.required:
-                if defaults_manager:
+                if param_name == "seed" and param.annotation is int:
+                    # Special handling for seed - generate random if not provided
+                    raw_value = random.randint(0, 2**32 - 1)
+                    logger.debug(f"Generated random seed for run_workflow: {raw_value}")
+                    for node_id, input_name in param.bindings:
+                        if node_id in workflow and "inputs" in workflow[node_id]:
+                            workflow[node_id]["inputs"][input_name] = raw_value
+                elif defaults_manager:
                     default_value = defaults_manager.get_default(namespace, param.name, None)
                     if default_value is not None:
                         for node_id, input_name in param.bindings:
                             if node_id in workflow and "inputs" in workflow[node_id]:
                                 workflow[node_id]["inputs"][input_name] = default_value
+
+        # Post-render cleanup: remove nodes with unresolved PARAM_ placeholders
+        # (optional params that were not provided and have no defaults)
+        nodes_to_remove: set[str] = set()
+        for node_id, node in list(workflow.items()):
+            if not isinstance(node, dict):
+                continue
+            for value in node.get("inputs", {}).values():
+                if isinstance(value, str) and value.startswith(PLACEHOLDER_PREFIX):
+                    nodes_to_remove.add(node_id)
+                    break
+        if nodes_to_remove:
+            for node_id in nodes_to_remove:
+                del workflow[node_id]
+            # Remove references to deleted nodes from remaining nodes' inputs
+            for node in workflow.values():
+                if not isinstance(node, dict):
+                    continue
+                inputs = node.get("inputs", {})
+                dead_keys = [
+                    k for k, v in inputs.items()
+                    if isinstance(v, list) and len(v) == 2 and str(v[0]) in nodes_to_remove
+                ]
+                for k in dead_keys:
+                    del inputs[k]
+            logger.debug("Removed unresolved nodes from run_workflow: %s", nodes_to_remove)
 
         # Store the report on the workflow dict so callers can access it
         # (using a private key that won't conflict with node IDs which are numeric strings)
@@ -367,7 +402,33 @@ class WorkflowManager:
             coerced_value = self._coerce_value(raw_value, param.annotation)
             for node_id, input_name in param.bindings:
                 workflow[node_id]["inputs"][input_name] = coerced_value
-        
+
+        # Post-render cleanup: remove nodes with unresolved PARAM_ placeholders
+        # (optional params that were not provided and have no defaults)
+        nodes_to_remove: set[str] = set()
+        for node_id, node in list(workflow.items()):
+            if not isinstance(node, dict):
+                continue
+            for value in node.get("inputs", {}).values():
+                if isinstance(value, str) and value.startswith(PLACEHOLDER_PREFIX):
+                    nodes_to_remove.add(node_id)
+                    break
+        if nodes_to_remove:
+            for node_id in nodes_to_remove:
+                del workflow[node_id]
+            # Remove references to deleted nodes from remaining nodes' inputs
+            for node in workflow.values():
+                if not isinstance(node, dict):
+                    continue
+                inputs = node.get("inputs", {})
+                dead_keys = [
+                    k for k, v in inputs.items()
+                    if isinstance(v, list) and len(v) == 2 and str(v[0]) in nodes_to_remove
+                ]
+                for k in dead_keys:
+                    del inputs[k]
+            logger.debug("Removed unresolved nodes: %s", nodes_to_remove)
+
         return workflow
 
     def _extract_parameters(self, workflow: Dict[str, Any]):
@@ -394,7 +455,8 @@ class WorkflowManager:
                         "seed", "width", "height", "model", "steps", "cfg",
                         "sampler_name", "scheduler", "denoise", "negative_prompt",
                         "seconds", "lyrics_strength",  # Audio-specific optional params
-                        "duration", "fps"  # Video-specific optional params
+                        "duration", "fps",  # Video-specific optional params
+                        "image2", "image3",  # Optional reference images
                     }
                     is_required = param_name not in optional_params
                     parameter = WorkflowParameter(

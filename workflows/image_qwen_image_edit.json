@@ -147,6 +147,14 @@
       "image1": [
         "65",
         0
+      ],
+      "image2": [
+        "80",
+        0
+      ],
+      "image3": [
+        "81",
+        0
       ]
     },
     "class_type": "TextEncodeQwenImageEditPlus",
@@ -171,6 +179,14 @@
       "image1": [
         "65",
         0
+      ],
+      "image2": [
+        "80",
+        0
+      ],
+      "image3": [
+        "81",
+        0
       ]
     },
     "class_type": "TextEncodeQwenImageEditPlus",
@@ -193,7 +209,7 @@
   },
   "75": {
     "inputs": {
-      "seed": 773901274379633,
+      "seed": "PARAM_INT_SEED",
       "steps": 4,
       "cfg": 1,
       "sampler_name": "euler",
@@ -241,6 +257,24 @@
     "class_type": "LoadImage",
     "_meta": {
       "title": "Load Image"
+    }
+  },
+  "80": {
+    "inputs": {
+      "image": "PARAM_IMAGE2"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "Load Image 2 (Reference)"
+    }
+  },
+  "81": {
+    "inputs": {
+      "image": "PARAM_IMAGE3"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "Load Image 3 (Reference)"
     }
   }
 }
