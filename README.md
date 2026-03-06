@@ -43,6 +43,56 @@ The server listens at:
 http://127.0.0.1:9000/mcp
 ```
 
+---
+
+## 🚀 Auto-Start with ComfyUI (Recommended)
+
+**Want the MCP server to start automatically when ComfyUI starts?** We provide a custom node that handles this automatically!
+
+### Installation
+
+1. **Run the installer**:
+   ```bash
+   cd comfyui_mcp_autostart
+   python install.py
+   ```
+   Or on Windows, simply double-click `install.bat`
+
+2. **Configure the path** (if needed):
+   Edit `ComfyUI/custom_nodes/comfyui_mcp_autostart/mcp_config.json`:
+   ```json
+   {
+     "enabled": true,
+     "mcp_server_path": "path/to/your/comfyui-mcp-server/server.py",
+     "auto_start": true,
+     "port": 9000,
+     "comfyui_url": "http://localhost:8188"
+   }
+   ```
+
+3. **Restart ComfyUI** - The MCP server will start automatically!
+
+### Features
+
+- ✅ **Auto-start**: MCP server starts when ComfyUI starts
+- ✅ **Auto-stop**: MCP server stops when ComfyUI closes
+- ✅ **Manual control**: Use the "MCP Server Control" node to start/stop/restart
+- ✅ **Easy configuration**: Configure via node or JSON file
+
+### Manual Installation
+
+If the installer doesn't find your ComfyUI, manually copy the folder:
+
+```bash
+# Copy the custom node folder
+cp -r comfyui_mcp_autostart /path/to/ComfyUI/custom_nodes/
+
+# Edit the configuration
+nano /path/to/ComfyUI/custom_nodes/comfyui_mcp_autostart/mcp_config.json
+```
+
+For detailed instructions, see [comfyui_mcp_autostart/README.md](comfyui_mcp_autostart/README.md).
+
 ### 4) Verify it works (no AI client required)
 
 Run the included test client:
@@ -289,9 +339,14 @@ comfyui-mcp-server/
 ├── models/                # Data models
 │   ├── workflow.py
 │   └── asset.py
-└── workflows/             # Workflow JSON files
-    ├── generate_image.json
-    └── generate_song.json
+├── workflows/             # Workflow JSON files
+│   ├── generate_image.json
+│   └── generate_song.json
+└── comfyui_mcp_autostart/ # ComfyUI custom node for auto-start
+    ├── __init__.py        # Custom node implementation
+    ├── mcp_config.json    # Configuration file
+    ├── install.py         # Installation script
+    └── README.md          # Installation instructions
 ```
 
 ## Notes
