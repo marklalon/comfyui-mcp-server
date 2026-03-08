@@ -53,13 +53,13 @@ http://127.0.0.1:9000/mcp
 
 1. **Run the installer**:
    ```bash
-   cd comfyui_mcp_autostart
+   cd comfyui_mcp_plugin
    python install.py
    ```
    Or on Windows, simply double-click `install.bat`
 
 2. **Configure the path** (if needed):
-   Edit `ComfyUI/custom_nodes/comfyui_mcp_autostart/mcp_config.json`:
+   Edit `ComfyUI/custom_nodes/comfyui_mcp_plugin/mcp_config.json`:
    ```json
    {
      "enabled": true,
@@ -85,13 +85,13 @@ If the installer doesn't find your ComfyUI, manually copy the folder:
 
 ```bash
 # Copy the custom node folder
-cp -r comfyui_mcp_autostart /path/to/ComfyUI/custom_nodes/
+cp -r comfyui_mcp_plugin /path/to/ComfyUI/custom_nodes/
 
 # Edit the configuration
-nano /path/to/ComfyUI/custom_nodes/comfyui_mcp_autostart/mcp_config.json
+nano /path/to/ComfyUI/custom_nodes/comfyui_mcp_plugin/mcp_config.json
 ```
 
-For detailed instructions, see [comfyui_mcp_autostart/README.md](comfyui_mcp_autostart/README.md).
+For detailed instructions, see [comfyui_mcp_plugin/README.md](comfyui_mcp_plugin/README.md).
 
 ### 4) Verify it works (no AI client required)
 
@@ -342,7 +342,7 @@ comfyui-mcp-server/
 ├── workflows/             # Workflow JSON files
 │   ├── generate_image.json
 │   └── generate_song.json
-└── comfyui_mcp_autostart/ # ComfyUI custom node for auto-start
+└── comfyui_mcp_plugin/    # ComfyUI custom node for auto-start
     ├── __init__.py        # Custom node implementation
     ├── mcp_config.json    # Configuration file
     ├── install.py         # Installation script

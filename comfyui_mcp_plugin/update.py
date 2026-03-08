@@ -24,7 +24,7 @@ def find_comfyui_paths():
     existing_paths = []
     for path in possible_paths:
         if path.exists():
-            custom_nodes = path / "custom_nodes" / "comfyui_mcp_autostart"
+            custom_nodes = path / "custom_nodes" / "comfyui_mcp_plugin"
             if custom_nodes.exists():
                 existing_paths.append(path)
     
@@ -49,7 +49,7 @@ def find_venv_python(mcp_server_dir: Path) -> str:
 def update_comfyui_node(comfyui_path: Path):
     source_dir = Path(__file__).parent
     source_file = source_dir / "__init__.py"
-    target_dir = comfyui_path / "custom_nodes" / "comfyui_mcp_autostart"
+    target_dir = comfyui_path / "custom_nodes" / "comfyui_mcp_plugin"
     target_file = target_dir / "__init__.py"
     mcp_server_dir = source_dir.parent
     
@@ -112,7 +112,7 @@ def main():
                 return
             
             path = Path(user_path)
-            target = path / "custom_nodes" / "comfyui_mcp_autostart" / "__init__.py"
+            target = path / "custom_nodes" / "comfyui_mcp_plugin" / "__init__.py"
             if path.exists() and target.exists():
                 comfyui_paths = [path]
                 break

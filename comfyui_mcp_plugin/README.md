@@ -6,9 +6,9 @@ This custom node automatically starts the MCP server when ComfyUI starts and sto
 
 ### Method 1: Manual Installation
 
-1. Copy the `comfyui_mcp_autostart` folder to your ComfyUI's `custom_nodes` directory:
+1. Copy the `comfyui_mcp_plugin` folder to your ComfyUI's `custom_nodes` directory:
    ```
-   ComfyUI/custom_nodes/comfyui_mcp_autostart/
+   ComfyUI/custom_nodes/comfyui_mcp_plugin/
    ```
 
 2. Edit the `mcp_config.json` file to set the correct path to your MCP server:

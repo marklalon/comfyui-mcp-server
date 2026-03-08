@@ -52,7 +52,7 @@ def find_venv_python(mcp_server_dir: Path) -> str:
 
 def install_to_comfyui(comfyui_path: Path):
     source_dir = Path(__file__).parent
-    target_dir = comfyui_path / "custom_nodes" / "comfyui_mcp_autostart"
+    target_dir = comfyui_path / "custom_nodes" / "comfyui_mcp_plugin"
     mcp_server_dir = source_dir.parent
     
     print(f"\nInstalling to: {target_dir}")
