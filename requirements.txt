@@ -1,6 +1,7 @@
 # Core dependencies
 requests>=2.31.0
 mcp>=0.9.0
+psutil>=5.9.0  # For process management (killing ComfyUI processes on shutdown)
 
 # Image processing (required for view_image tool)
 Pillow>=10.0.0
