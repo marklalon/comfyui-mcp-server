@@ -8,7 +8,7 @@ import random
 from typing import Any, Dict, Optional
 
 from mcp.server.fastmcp import FastMCP
-from managers.workflow_manager import AUDIO_OUTPUT_KEYS, VIDEO_OUTPUT_KEYS
+from managers.workflow_manager import AUDIO_OUTPUT_KEYS, VIDEO_OUTPUT_KEYS, TEXT_OUTPUT_KEYS
 from models.workflow import WorkflowToolDefinition
 from tools.helpers import register_and_build_response
 
@@ -95,11 +95,13 @@ def register_workflow_generation_tools(
             
             # Determine namespace using workflow manager (content-aware)
             namespace = workflow_manager._determine_namespace(definition.workflow_id)
-            # Refine using output preferences (catches custom audio/video workflows)
+            # Refine using output preferences (catches custom audio/video/text workflows)
             if definition.output_preferences == AUDIO_OUTPUT_KEYS:
                 namespace = "audio"
             elif definition.output_preferences == VIDEO_OUTPUT_KEYS:
                 namespace = "video"
+            elif definition.output_preferences == TEXT_OUTPUT_KEYS:
+                namespace = "text"
 
             try:
                 # Only validate model if the workflow actually has a 'model' parameter
@@ -432,6 +434,8 @@ def register_regenerate_tool(
                     output_preferences = ("audio", "audios", "sound", "files")
                 elif "video" in asset.workflow_id.lower():
                     output_preferences = ("videos", "video", "mp4", "mov", "webm")
+                elif "text" in asset.workflow_id.lower():
+                    output_preferences = TEXT_OUTPUT_KEYS
             
             # Step 6: Submit to ComfyUI
             result = comfyui_client.run_custom_workflow(

@@ -46,6 +46,7 @@ PLACEHOLDER_DESCRIPTIONS = {
 DEFAULT_OUTPUT_KEYS = ("images", "image", "gifs", "gif")
 AUDIO_OUTPUT_KEYS = ("audio", "audios", "sound", "files")
 VIDEO_OUTPUT_KEYS = ("videos", "video", "mp4", "mov", "webm")
+TEXT_OUTPUT_KEYS = ("text", "texts", "string", "strings", "ui")
 
 
 class WorkflowManager:
@@ -518,16 +519,34 @@ class WorkflowManager:
             return "audio"
         elif workflow_id == "generate_video":
             return "video"
+        elif workflow_id == "image_to_text" or "text" in workflow_id.lower():
+            return "text"
         else:
             return "image"  # default fallback
     
     def _guess_output_preferences(self, workflow: Dict[str, Any]):
+        # First check for explicit output_preferences in _meta
+        meta = workflow.get("_meta", {})
+        if isinstance(meta, dict):
+            explicit_prefs = meta.get("output_preferences")
+            if explicit_prefs:
+                if isinstance(explicit_prefs, str):
+                    return (explicit_prefs,)
+                elif isinstance(explicit_prefs, (list, tuple)):
+                    return tuple(explicit_prefs)
+        
+        # Then check for node types
         for node in workflow.values():
+            if not isinstance(node, dict):
+                continue
             class_type = str(node.get("class_type", "")).lower()
             if "audio" in class_type:
                 return AUDIO_OUTPUT_KEYS
             if "video" in class_type or "savevideo" in class_type or "videocombine" in class_type:
                 return VIDEO_OUTPUT_KEYS
+            # Check for TextOutput node
+            if class_type == "textoutput":
+                return TEXT_OUTPUT_KEYS
         return DEFAULT_OUTPUT_KEYS
 
     def _coerce_value(self, value: Any, annotation: type):

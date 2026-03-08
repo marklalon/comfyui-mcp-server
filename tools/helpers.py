@@ -31,10 +31,23 @@ def register_and_build_response(
     Returns:
         Response data dict with asset_id, asset_url, metadata, etc.
         If the workflow is still running (timeout), returns a job handle dict instead.
+        If the workflow produces text output, returns a text response dict.
     """
     # If the result is a "still running" job handle, pass it through directly
     if result.get("status") == "running":
         return result
+
+    # Check if this is a text output workflow
+    if "text" in result:
+        # Text output workflow - return text directly
+        response_data = {
+            "text": result["text"],
+            "workflow_id": workflow_id,
+            "prompt_id": result.get("prompt_id"),
+        }
+        if tool_name:
+            response_data["tool"] = tool_name
+        return response_data
 
     # Register asset in registry using stable identity
     asset_metadata = result.get("asset_metadata", {})

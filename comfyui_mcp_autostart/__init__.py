@@ -295,14 +295,51 @@ class MCPServerConfig:
             return (f"Failed to save configuration: {e}",)
 
 
+class TextOutput:
+    """
+    A ComfyUI node that outputs text for MCP consumption.
+    Unlike PreviewAny which only displays text in the UI,
+    this node returns the text as a proper output that can be
+    captured by the MCP server, while also displaying in the UI.
+    """
+    
+    def __init__(self):
+        pass
+    
+    @classmethod
+    def INPUT_TYPES(s):
+        return {
+            "required": {
+                "text": ("STRING", {"default": "", "multiline": True}),
+            },
+        }
+    
+    RETURN_TYPES = ("STRING",)
+    RETURN_NAMES = ("text_output",)
+    FUNCTION = "output_text"
+    CATEGORY = "MCP"
+    OUTPUT_NODE = True
+    
+    def output_text(self, text):
+        """
+        Output text for MCP consumption.
+        Returns the text directly so it can be captured by the MCP server.
+        Also returns ui.text for display in the ComfyUI interface.
+        """
+        logger.info(f"[TextOutput] Outputting text ({len(text)} characters)")
+        return {"ui": {"text": (text,)}, "result": (text,)}
+
+
 NODE_CLASS_MAPPINGS = {
     "MCPServerControl": MCPServerControl,
     "MCPServerConfig": MCPServerConfig,
+    "TextOutput": TextOutput,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
     "MCPServerControl": "🔧 MCP Server Control",
     "MCPServerConfig": "⚙️ MCP Server Config",
+    "TextOutput": "📝 Text Output",
 }
 
 

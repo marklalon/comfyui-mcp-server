@@ -103,6 +103,30 @@ class ComfyUIClient:
                 ),
             }
 
+        # Check if this is a text output workflow
+        text_keys = ("text", "texts", "string", "strings")
+        is_text_workflow = any(key in preferred_output_keys for key in text_keys)
+        
+        if is_text_workflow:
+            # Extract text output instead of file assets
+            text_output = self._extract_text_output(outputs, preferred_output_keys)
+            
+            # Get full history snapshot for this prompt
+            try:
+                history = self.get_history(prompt_id)
+                comfy_history = history.get(prompt_id, {}) if history else {}
+            except Exception as e:
+                logger.warning(f"Failed to fetch history snapshot for {prompt_id}: {e}")
+                comfy_history = None
+            
+            return {
+                "text": text_output,
+                "prompt_id": prompt_id,
+                "raw_outputs": outputs,
+                "comfy_history": comfy_history,
+                "submitted_workflow": workflow
+            }
+
         # Extract asset info (filename, subfolder, type) - stable identity
         asset_info = self._extract_first_asset_info(outputs, preferred_output_keys)
         asset_url = asset_info["asset_url"]
@@ -445,6 +469,54 @@ class ComfyUIClient:
         raise Exception(
             f"No outputs matched preferred keys: {preferred_output_keys}. "
             f"Available outputs: {json.dumps({k: list(v.keys()) if isinstance(v, dict) else type(v).__name__ for k, v in outputs.items()}, indent=2)}"
+        )
+    
+    def _extract_text_output(self, outputs: Dict[str, Any], preferred_output_keys: Sequence[str]) -> str:
+        """Extract text output from workflow outputs.
+        
+        Looks for text/string outputs from TextOutput nodes or similar.
+        Also checks for 'ui' output which may contain text from PreviewAny nodes.
+        
+        The ComfyUI outputs structure is: {node_id: {output_key: [values]}}
+        For TextOutput/PreviewAny nodes, the output is typically {"text": [text_value]}
+        
+        Returns the extracted text as a string.
+        """
+        text_keys = ("text", "texts", "string", "strings")
+        
+        logger.debug("Extracting text output from keys: %s", list(outputs.keys()))
+        
+        # Look for text output in node outputs
+        # Structure: {node_id: {"text": [text_values]}}
+        for node_id, node_output in outputs.items():
+            if not isinstance(node_output, dict):
+                logger.debug("Node %s output is not a dict: %s", node_id, type(node_output))
+                continue
+            
+            # Check for text keys directly in the output
+            for key in text_keys:
+                text_value = node_output.get(key)
+                if text_value:
+                    # Handle list of strings (typical ComfyUI format)
+                    if isinstance(text_value, list) and len(text_value) > 0:
+                        return "\n".join(str(t) for t in text_value)
+                    elif isinstance(text_value, str):
+                        return text_value
+            
+            # Also check for 'ui' sub-key (PreviewAny format)
+            ui_output = node_output.get("ui")
+            if ui_output and isinstance(ui_output, dict):
+                for key in text_keys:
+                    text_list = ui_output.get(key)
+                    if text_list and isinstance(text_list, list) and len(text_list) > 0:
+                        return "\n".join(str(t) for t in text_list)
+        
+        # Log available outputs for debugging
+        logger.error("No text output found. Available outputs: %s", 
+                     json.dumps({k: list(v.keys()) if isinstance(v, dict) else type(v).__name__ for k, v in outputs.items()}, indent=2))
+        raise Exception(
+            f"No text output found in workflow. "
+            f"Available outputs: {list(outputs.keys())}"
         )
     
     def _extract_first_asset_info(self, outputs: Dict[str, Any], preferred_output_keys: Sequence[str]) -> Dict[str, Any]:
