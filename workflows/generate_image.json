@@ -87,7 +87,7 @@
     "inputs": {
       "width": "PARAM_INT_WIDTH",
       "height": "PARAM_INT_HEIGHT",
-      "batch_size": 1
+      "batch_size": "PARAM_INT_BATCH_SIZE"
     },
     "class_type": "EmptySD3LatentImage",
     "_meta": {

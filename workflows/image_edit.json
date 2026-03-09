@@ -1,13 +1,4 @@
 {
-  "43": {
-    "inputs": {
-      "value": "PARAM_PROMPT"
-    },
-    "class_type": "PrimitiveStringMultiline",
-    "_meta": {
-      "title": "Prompt"
-    }
-  },
   "61": {
     "inputs": {
       "strength": 1,
@@ -147,27 +138,16 @@
       "image1": [
         "65",
         0
-      ],
-      "image2": [
-        "80",
-        0
-      ],
-      "image3": [
-        "81",
-        0
       ]
     },
     "class_type": "TextEncodeQwenImageEditPlus",
     "_meta": {
-      "title": "TextEncodeQwenImageEditPlus"
+      "title": "TextEncodeQwenImageEditPlus (Negative)"
     }
   },
   "73": {
     "inputs": {
-      "prompt": [
-        "43",
-        0
-      ],
+      "prompt": "PARAM_PROMPT",
       "clip": [
         "67",
         0
@@ -181,11 +161,11 @@
         0
       ],
       "image2": [
-        "80",
+        "86",
         0
       ],
       "image3": [
-        "81",
+        "87",
         0
       ]
     },
@@ -259,22 +239,22 @@
       "title": "Load Image"
     }
   },
-  "80": {
+  "86": {
     "inputs": {
       "image": "PARAM_IMAGE2"
     },
     "class_type": "LoadImage",
     "_meta": {
-      "title": "Load Image 2 (Reference)"
+      "title": "Load Image 2 (Optional)"
     }
   },
-  "81": {
+  "87": {
     "inputs": {
       "image": "PARAM_IMAGE3"
     },
     "class_type": "LoadImage",
     "_meta": {
-      "title": "Load Image 3 (Reference)"
+      "title": "Load Image 3 (Optional)"
     }
   }
 }

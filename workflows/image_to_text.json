@@ -1,16 +1,4 @@
 {
-  "12": {
-    "inputs": {
-      "text": [
-        "17",
-        0
-      ]
-    },
-    "class_type": "TextOutput",
-    "_meta": {
-      "title": "Text Output"
-    }
-  },
   "17": {
     "inputs": {
       "model_name": "Qwen3-VL-8B-Instruct-FP8",
@@ -18,12 +6,12 @@
       "attention_mode": "auto",
       "preset_prompt": "🖼️ Simple Description",
       "custom_prompt": [
-        "24",
+        "40",
         0
       ],
       "max_tokens": 512,
       "keep_model_loaded": true,
-      "seed": 3414974096,
+      "seed": "PARAM_INT_SEED",
       "image": [
         "19",
         0
@@ -43,13 +31,25 @@
       "title": "Load Image"
     }
   },
-  "24": {
+  "36": {
+    "inputs": {
+      "text": [
+        "17",
+        0
+      ]
+    },
+    "class_type": "TextOutput",
+    "_meta": {
+      "title": "📝 Text Output"
+    }
+  },
+  "40": {
     "inputs": {
       "value": "PARAM_PROMPT"
     },
-    "class_type": "PrimitiveString",
+    "class_type": "PrimitiveStringMultiline",
     "_meta": {
-      "title": "Custom Prompt"
+      "title": "Prompt"
     }
   }
 }

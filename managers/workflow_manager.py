@@ -26,6 +26,7 @@ PLACEHOLDER_DESCRIPTIONS = {
     "seed": "Random seed for image generation. If not provided, a random seed will be generated.",
     "width": "Image width in pixels. Default: 512.",
     "height": "Image height in pixels. Default: 512.",
+    "batch_size": "Number of images to generate in a batch. Default: 1.",
     "model": "Checkpoint model name (e.g., 'v1-5-pruned-emaonly.ckpt', 'sd_xl_base_1.0.safetensors'). Default: 'v1-5-pruned-emaonly.ckpt'.",
     "steps": "Number of sampling steps. Higher = better quality but slower. Default: 20.",
     "cfg": "Classifier-free guidance scale. Higher = more adherence to prompt. Default: 8.0.",
@@ -453,7 +454,7 @@ class WorkflowManager:
                     # Only 'tags' and 'lyrics' should be required for generate_song
                     # Only 'prompt' should be required for generate_video
                     optional_params = {
-                        "seed", "width", "height", "model", "steps", "cfg",
+                        "seed", "width", "height", "batch_size", "model", "steps", "cfg",
                         "sampler_name", "scheduler", "denoise", "negative_prompt",
                         "seconds", "lyrics_strength",  # Audio-specific optional params
                         "duration", "fps",  # Video-specific optional params

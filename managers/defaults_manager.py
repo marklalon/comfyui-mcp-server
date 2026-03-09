@@ -34,6 +34,7 @@ class DefaultsManager:
             "image": {
                 "width": 512,
                 "height": 512,
+                "batch_size": 1,
                 "steps": 20,
                 "cfg": 8.0,
                 "sampler_name": "euler",
