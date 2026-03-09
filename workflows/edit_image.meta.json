@@ -1,0 +1,3 @@
+{
+  "description": "Edit an image using Image Edit model with text instructions. Transforms the input image based on the provided prompt. Supports multiple reference images for more precise editing."
+}

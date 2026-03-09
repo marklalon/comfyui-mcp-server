@@ -347,7 +347,7 @@ class WorkflowManager:
             definition = WorkflowToolDefinition(
                 workflow_id=workflow_path.stem,
                 tool_name=tool_name,
-                description=self._derive_description(workflow_path.stem),
+                description=self._derive_description(workflow_path.stem, workflow_path),
                 template=workflow,
                 parameters=parameters,
                 output_preferences=self._guess_output_preferences(workflow),
@@ -436,6 +436,8 @@ class WorkflowManager:
     def _extract_parameters(self, workflow: Dict[str, Any]):
         parameters: "OrderedDict[str, WorkflowParameter]" = OrderedDict()
         for node_id, node in workflow.items():
+            if not isinstance(node, dict):
+                continue
             inputs = node.get("inputs", {})
             if not isinstance(inputs, dict):
                 continue
@@ -509,7 +511,14 @@ class WorkflowManager:
         self._tool_names.add(deduped)
         return deduped
 
-    def _derive_description(self, stem: str):
+    def _derive_description(self, stem: str, workflow_path: Optional[Path] = None):
+        # First check if sidecar metadata file exists with description
+        if workflow_path:
+            meta = self._load_workflow_metadata(workflow_path)
+            if meta.get("description"):
+                return meta["description"]
+        
+        # Fallback to generated description
         readable = stem.replace("_", " ").replace("-", " ").strip()
         readable = readable if readable else stem
         return f"Execute the '{readable}' ComfyUI workflow."
