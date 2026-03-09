@@ -31,18 +31,6 @@
       "title": "Load Image"
     }
   },
-  "36": {
-    "inputs": {
-      "text": [
-        "17",
-        0
-      ]
-    },
-    "class_type": "TextOutput",
-    "_meta": {
-      "title": "📝 Text Output"
-    }
-  },
   "40": {
     "inputs": {
       "value": "PARAM_PROMPT"
@@ -50,6 +38,20 @@
     "class_type": "PrimitiveStringMultiline",
     "_meta": {
       "title": "Prompt"
+    }
+  },
+  "43": {
+    "inputs": {
+      "preview": "A young child with dark hair, wearing a white shirt and blue shorts, is crouched over a pottery wheel outdoors, shaping wet clay with both hands while mud splatters cover their fingers and the spinning surface.",
+      "previewMode": false,
+      "source": [
+        "17",
+        0
+      ]
+    },
+    "class_type": "PreviewAny",
+    "_meta": {
+      "title": "Preview as Text"
     }
   }
 }

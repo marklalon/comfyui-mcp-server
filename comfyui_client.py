@@ -474,11 +474,11 @@ class ComfyUIClient:
     def _extract_text_output(self, outputs: Dict[str, Any], preferred_output_keys: Sequence[str]) -> str:
         """Extract text output from workflow outputs.
         
-        Looks for text/string outputs from TextOutput nodes or similar.
+        Looks for text/string outputs from PreviewAny nodes or similar.
         Also checks for 'ui' output which may contain text from PreviewAny nodes.
         
         The ComfyUI outputs structure is: {node_id: {output_key: [values]}}
-        For TextOutput/PreviewAny nodes, the output is typically {"text": [text_value]}
+        For PreviewAny nodes, the output is typically {"text": [text_value]}
         
         Returns the extracted text as a string.
         """

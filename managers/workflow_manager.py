@@ -554,8 +554,8 @@ class WorkflowManager:
                 return AUDIO_OUTPUT_KEYS
             if "video" in class_type or "savevideo" in class_type or "videocombine" in class_type:
                 return VIDEO_OUTPUT_KEYS
-            # Check for TextOutput node
-            if class_type == "textoutput":
+            # Check for PreviewAny node (text output)
+            if class_type == "previewany":
                 return TEXT_OUTPUT_KEYS
         return DEFAULT_OUTPUT_KEYS
 

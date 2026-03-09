@@ -50,7 +50,7 @@ OUTPUT_NODE_MAPPING = {
     "VHS_SaveVideo": ("videos", "video", "mp4"),
     "VideoCombine": ("videos", "video", "mp4"),
     "SaveVideo": ("videos", "video", "mp4"),
-    "TextOutput": ("text", "texts", "string", "strings", "ui"),
+    "PreviewAny": ("text", "texts", "string", "strings", "ui"),
 }
 
 # Type inference from field names
