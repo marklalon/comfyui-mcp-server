@@ -62,6 +62,7 @@ generate_image(
   "asset_id": "uuid-string",
   "asset_url": "http://localhost:8188/view?filename=...",
   "image_url": "http://localhost:8188/view?filename=...",
+  "local_path": "D:/ComfyUI/output/ComfyUI_00265_.png",
   "filename": "ComfyUI_00265_.png",
   "subfolder": "",
   "folder_type": "output",
@@ -75,6 +76,8 @@ generate_image(
   "inline_preview_base64": "data:image/webp;base64,..."  // if return_inline_preview=true
 }
 ```
+
+- `local_path`: Local file path to the generated asset (requires ComfyUI output root to be configured via `set_comfyui_output_root` or auto-detected)
 
 **Examples:**
 

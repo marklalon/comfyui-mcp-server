@@ -4,3 +4,6 @@ __pycache__/
 archive/
 public/
 logs/
+
+# 本地配置，可能含机器特定路径
+mcp_config.json

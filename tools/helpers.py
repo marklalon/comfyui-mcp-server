@@ -74,10 +74,14 @@ def register_and_build_response(
     # Build response data
     # Use asset_record.asset_url (computed from stable identity)
     asset_url = asset_record.asset_url or result.get("asset_url", "")
+    
+    # Compute local file path
+    local_path = asset_record.local_path if hasattr(asset_record, 'local_path') else ""
+    
     response_data = {
         "asset_id": asset_record.asset_id,
         "asset_url": asset_url,
-        "image_url": asset_url,  # Backward compatibility
+        "local_path": local_path,  # Local file path for easy access
         "filename": asset_record.filename,  # Stable identity
         "subfolder": asset_record.subfolder,  # Stable identity
         "folder_type": asset_record.folder_type,  # Stable identity

@@ -1,8 +1,0 @@
-{
-  "enabled": true,
-  "mcp_server_path": "d:/AI/comfyui-mcp-server/server.py",
-  "python_path": "d:/AI/comfyui-mcp-server/.venv/Scripts/python.exe",
-  "auto_start": true,
-  "port": 9000,
-  "comfyui_url": "http://localhost:8188"
-}

@@ -144,6 +144,11 @@ try:
         comfyui_url=COMFYUI_URL
     )
     publish_manager = PublishManager(publish_config)
+    
+    # Set ComfyUI output root on asset registry for local path computation
+    if publish_config.comfyui_output_root:
+        asset_registry.set_comfyui_output_root(publish_config.comfyui_output_root)
+    
     logger.info(f"Publish manager initialized with project_root={publish_config.project_root} (method: {publish_config.project_root_method})")
     logger.info(f"Publish root: {publish_config.publish_root}")
     if publish_config.comfyui_output_root:

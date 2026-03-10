@@ -72,7 +72,13 @@ def register_publish_tools(
             - message: Human-readable status message
             - error: Error code if configuration failed
         """
-        return publish_manager.set_comfyui_output_root(path)
+        result = publish_manager.set_comfyui_output_root(path)
+        
+        # Also update asset registry for local path computation
+        if result.get("success") and hasattr(asset_registry, 'set_comfyui_output_root'):
+            asset_registry.set_comfyui_output_root(result.get("path"))
+        
+        return result
     
     @mcp.tool()
     def publish_asset(

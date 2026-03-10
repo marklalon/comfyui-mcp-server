@@ -4,7 +4,8 @@ import logging
 import threading
 import uuid
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional, Tuple
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 from models.asset import AssetRecord
 
@@ -29,7 +30,26 @@ class AssetRegistry:
         self._lock = threading.RLock()  # Reentrant lock for thread safety
         self.ttl_hours = ttl_hours
         self.comfyui_base_url = comfyui_base_url
+        self._comfyui_output_root: Optional[Path] = None  # ComfyUI output directory for local paths
         logger.info(f"Initialized AssetRegistry with TTL: {ttl_hours} hours")
+    
+    def set_comfyui_output_root(self, output_root: Optional[Union[str, Path]]):
+        """Set ComfyUI output root directory for computing local file paths.
+        
+        Args:
+            output_root: Path to ComfyUI output directory (e.g., /path/to/comfyui/output)
+        """
+        if output_root:
+            self._comfyui_output_root = Path(output_root).resolve()
+            logger.info(f"Set ComfyUI output root: {self._comfyui_output_root}")
+        else:
+            self._comfyui_output_root = None
+            logger.info("Cleared ComfyUI output root")
+    
+    @property
+    def comfyui_output_root(self) -> Optional[Path]:
+        """Get ComfyUI output root directory."""
+        return self._comfyui_output_root
     
     def register_asset(
         self,
@@ -102,6 +122,10 @@ class AssetRegistry:
             
             # Set base URL for asset URL computation
             record.set_base_url(self.comfyui_base_url)
+            
+            # Set output root for local path computation
+            if self._comfyui_output_root:
+                record.set_output_root(str(self._comfyui_output_root))
             
             self._assets[asset_id] = record
             self._asset_key_to_id[asset_key] = asset_id

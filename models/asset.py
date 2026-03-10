@@ -75,3 +75,36 @@ class AssetRecord:
     def set_base_url(self, base_url: str):
         """Set the ComfyUI base URL for computing asset URLs."""
         self._base_url = base_url
+    
+    def get_local_path(self, output_root: str) -> str:
+        """Get local file path for the asset.
+        
+        Args:
+            output_root: ComfyUI output directory root path
+        
+        Returns:
+            Local file path (e.g., "D:/comfyui/output/image.png" or "D:/comfyui/output/subfolder/image.png")
+        """
+        from pathlib import Path
+        root = Path(output_root)
+        if self.subfolder:
+            return str(root / self.subfolder / self.filename)
+        else:
+            return str(root / self.filename)
+    
+    @property
+    def local_path(self) -> str:
+        """Compute local file path on-the-fly from stable identity.
+        
+        Note: This requires the output root to be stored. The registry
+        sets this via _output_root attribute. Falls back to empty string
+        if output root not available.
+        """
+        output_root = getattr(self, '_output_root', None)
+        if output_root:
+            return self.get_local_path(output_root)
+        return ""
+    
+    def set_output_root(self, output_root: str):
+        """Set the ComfyUI output root for computing local paths."""
+        self._output_root = output_root
