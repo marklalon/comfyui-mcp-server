@@ -4,7 +4,6 @@ import logging
 import os
 import sys
 import time
-import threading
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import AsyncIterator
@@ -210,139 +209,7 @@ else:
     logger.error("Publish manager not available - publish tools will not be registered")
 
 
-# ComfyUI Monitor - Auto-shutdown when ComfyUI disappears
-class ComfyUIMonitor:
-    """Monitor ComfyUI availability and shutdown MCP server when ComfyUI disappears."""
-    
-    def __init__(self, comfyui_url: str, check_interval: float = 1.0, max_failures: int = 1):
-        self.comfyui_url = comfyui_url
-        self.check_interval = check_interval
-        self.max_failures = max_failures
-        self._stop_event = threading.Event()
-        self._thread: threading.Thread | None = None
-        self._failure_count = 0
-    
-    def _check_comfyui_alive(self) -> bool:
-        """Check if ComfyUI is still responding."""
-        try:
-            response = requests.get(f"{self.comfyui_url}/system_stats", timeout=3)
-            return response.status_code == 200
-        except (requests.RequestException, ValueError):
-            return False
-    
-    def _monitor_loop(self):
-        """Background thread that monitors ComfyUI availability."""
-        logger.info(f"[ComfyUI-Monitor] Started monitoring ComfyUI at {self.comfyui_url}")
-        
-        while not self._stop_event.is_set():
-            if self._check_comfyui_alive():
-                self._failure_count = 0  # Reset on success
-            else:
-                self._failure_count += 1
-                logger.warning(f"[ComfyUI-Monitor] ComfyUI not responding (attempt {self._failure_count}/{self.max_failures})")
-                
-                if self._failure_count >= self.max_failures:
-                    logger.warning("[ComfyUI-Monitor] ComfyUI has disappeared, shutting down MCP server...")
-                    print("\n" + "=" * 70)
-                    print("[!] ComfyUI has stopped - Shutting down MCP server")
-                    print("=" * 70 + "\n")
-                    # Kill all remaining ComfyUI processes
-                    self._kill_comfyui_processes()
-                    # Force exit the process
-                    os._exit(0)
-            
-            self._stop_event.wait(self.check_interval)
-    
-    def _kill_comfyui_processes(self):
-        """Kill all ComfyUI processes (including python processes running ComfyUI)."""
-        killed_processes = []
-        
-        # Fast path: Use system commands first (much faster than psutil iteration)
-        if sys.platform == "win32":
-            try:
-                import subprocess
-                
-                # Kill ComfyUI.exe directly (fastest)
-                result = subprocess.run(
-                    ["taskkill", "/F", "/IM", "ComfyUI.exe"],
-                    capture_output=True, timeout=2
-                )
-                if result.returncode == 0:
-                    killed_processes.append("ComfyUI.exe")
-                    logger.info("[ComfyUI-Monitor] Killed ComfyUI.exe")
-                
-                # Kill python processes running ComfyUI (use wmic for speed)
-                result = subprocess.run(
-                    ['wmic', 'process', 'where', "commandline like '%comfyui%' and name='python.exe'", 'delete'],
-                    capture_output=True, timeout=3
-                )
-                if result.returncode == 0:
-                    killed_processes.append("python.exe (ComfyUI)")
-                    logger.info("[ComfyUI-Monitor] Killed python.exe ComfyUI processes")
-                
-                # Kill node processes related to ComfyUI
-                result = subprocess.run(
-                    ['wmic', 'process', 'where', "commandline like '%comfyui%' and name='node.exe'", 'delete'],
-                    capture_output=True, timeout=3
-                )
-                if result.returncode == 0:
-                    killed_processes.append("node.exe (ComfyUI)")
-                    logger.info("[ComfyUI-Monitor] Killed node.exe ComfyUI processes")
-                    
-            except subprocess.TimeoutExpired:
-                logger.warning("[ComfyUI-Monitor] Timeout while killing processes")
-            except Exception as e:
-                logger.warning(f"[ComfyUI-Monitor] System command failed: {e}")
-        else:
-            # Linux/Mac: use pkill
-            try:
-                import subprocess
-                subprocess.run(["pkill", "-f", "comfyui"], capture_output=True, timeout=2)
-                subprocess.run(["pkill", "-f", "main.py"], capture_output=True, timeout=2)
-                killed_processes.append("ComfyUI processes")
-                logger.info("[ComfyUI-Monitor] Killed ComfyUI processes via pkill")
-            except Exception as e:
-                logger.warning(f"[ComfyUI-Monitor] pkill failed: {e}")
-        
-        if killed_processes:
-            logger.info(f"[ComfyUI-Monitor] Killed: {', '.join(killed_processes)}")
-    
-    def start(self):
-        """Start the monitoring thread."""
-        if self._thread is None:
-            self._thread = threading.Thread(target=self._monitor_loop, daemon=True)
-            self._thread.start()
-    
-    def stop(self):
-        """Stop the monitoring thread."""
-        self._stop_event.set()
-        if self._thread:
-            self._thread.join(timeout=2)
-
-
-# Global monitor instance
-_comfyui_monitor: ComfyUIMonitor | None = None
-
-
-def start_comfyui_monitor():
-    """Start the ComfyUI availability monitor."""
-    global _comfyui_monitor
-    if _comfyui_monitor is None:
-        _comfyui_monitor = ComfyUIMonitor(COMFYUI_URL)
-        _comfyui_monitor.start()
-
-
-def stop_comfyui_monitor():
-    """Stop the ComfyUI availability monitor."""
-    global _comfyui_monitor
-    if _comfyui_monitor:
-        _comfyui_monitor.stop()
-        _comfyui_monitor = None
-
-
 if __name__ == "__main__":
-    # Start ComfyUI monitor to auto-shutdown when ComfyUI disappears
-    start_comfyui_monitor()
     # Check if running as MCP command (stdio) or standalone (streamable-http)
     # When run as command by MCP client (like Cursor), use stdio transport
     # When run standalone, use streamable-http for HTTP access
