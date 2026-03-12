@@ -11,22 +11,6 @@
       "title": "Load 3D Mesh (OBJ/GLB/STL...)"
     }
   },
-  "2": {
-    "inputs": {
-      "target_count": [
-        "6",
-        0
-      ],
-      "mesh": [
-        "1",
-        1
-      ]
-    },
-    "class_type": "RemeshMesh",
-    "_meta": {
-      "title": "Remesh / Simplify Mesh"
-    }
-  },
   "3": {
     "inputs": {
       "filename_prefix": "mesh/simplified_mesh",
@@ -40,23 +24,18 @@
       "title": "Convert to GLB"
     }
   },
-  "6": {
-    "inputs": {
-      "value": "PARAM_INT_TARGET_COUNT"
-    },
-    "class_type": "PrimitiveInt",
-    "_meta": {
-      "title": "target_count"
-    }
-  },
   "7": {
     "inputs": {
       "auto_smooth_angle": 30,
       "enable_uv_unwrap": false,
       "uv_method": "smart_project",
-      "mesh": [
-        "2",
+      "decimate_ratio": [
+        "10",
         0
+      ],
+      "mesh": [
+        "1",
+        1
       ]
     },
     "class_type": "BlenderMeshProcessor",
@@ -71,6 +50,15 @@
     "class_type": "PrimitiveString",
     "_meta": {
       "title": "mesh_path"
+    }
+  },
+  "10": {
+    "inputs": {
+      "value": "PARAM_FLOAT_DECIMATE_RATIO"
+    },
+    "class_type": "PrimitiveFloat",
+    "_meta": {
+      "title": "Float"
     }
   }
 }

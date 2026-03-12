@@ -79,30 +79,18 @@
       "title": "Hunyuan3D Texure Synthsis"
     }
   },
-  "34": {
-    "inputs": {
-      "target_count": [
-        "37",
-        0
-      ],
-      "mesh": [
-        "4",
-        1
-      ]
-    },
-    "class_type": "RemeshMesh",
-    "_meta": {
-      "title": "Remesh / Simplify Mesh"
-    }
-  },
   "35": {
     "inputs": {
       "auto_smooth_angle": 30,
       "enable_uv_unwrap": false,
       "uv_method": "smart_project",
-      "mesh": [
-        "34",
+      "decimate_ratio": [
+        "40",
         0
+      ],
+      "mesh": [
+        "4",
+        1
       ]
     },
     "class_type": "BlenderMeshProcessor",
@@ -113,15 +101,6 @@
   "36": {
     "inputs": {
       "value": "PARAM_INT_TEXTURE_SIZE"
-    },
-    "class_type": "PrimitiveInt",
-    "_meta": {
-      "title": "Int"
-    }
-  },
-  "37": {
-    "inputs": {
-      "value": "PARAM_INT_TARGET_COUNT"
     },
     "class_type": "PrimitiveInt",
     "_meta": {
@@ -149,6 +128,15 @@
     "class_type": "BRIA_RMBG_Zho",
     "_meta": {
       "title": "🧹BRIA RMBG"
+    }
+  },
+  "40": {
+    "inputs": {
+      "value": "PARAM_FLOAT_DECIMATE_RATIO"
+    },
+    "class_type": "PrimitiveFloat",
+    "_meta": {
+      "title": "Float"
     }
   }
 }
