@@ -44,7 +44,7 @@ PLACEHOLDER_DESCRIPTIONS = {
     "image2": "Optional second reference image. Accepts a local file path or a filename in ComfyUI's input directory.",
     "image3": "Optional third reference image. Accepts a local file path or a filename in ComfyUI's input directory.",
 }
-DEFAULT_OUTPUT_KEYS = ("images", "image", "gifs", "gif")
+DEFAULT_OUTPUT_KEYS = ("images", "image", "gifs", "gif", "files")
 AUDIO_OUTPUT_KEYS = ("audio", "audios", "sound", "files")
 VIDEO_OUTPUT_KEYS = ("videos", "video", "mp4", "mov", "webm")
 TEXT_OUTPUT_KEYS = ("text", "texts", "string", "strings", "ui")
@@ -315,6 +315,8 @@ class WorkflowManager:
             definition.template = workflow
             definition.parameters = self._extract_parameters(workflow)
             definition.output_preferences = self._guess_output_preferences(workflow)
+            definition.defaults = self._load_workflow_metadata(workflow_path).get("defaults", {})
+            self._apply_workflow_defaults_to_params(definition.parameters, definition.defaults)
             self._workflow_cache[definition.workflow_id] = workflow
             self._workflow_mtime[definition.workflow_id] = current_mtime
         except (json.JSONDecodeError, IOError) as e:
@@ -344,6 +346,9 @@ class WorkflowManager:
                 continue
 
             tool_name = self._dedupe_tool_name(self._derive_tool_name(workflow_path.stem))
+            meta = self._load_workflow_metadata(workflow_path)
+            workflow_defaults = meta.get("defaults", {})
+            self._apply_workflow_defaults_to_params(parameters, workflow_defaults)
             definition = WorkflowToolDefinition(
                 workflow_id=workflow_path.stem,
                 tool_name=tool_name,
@@ -351,6 +356,7 @@ class WorkflowManager:
                 template=workflow,
                 parameters=parameters,
                 output_preferences=self._guess_output_preferences(workflow),
+                defaults=workflow_defaults,
             )
             # Store initial mtime for cache invalidation
             try:
@@ -366,6 +372,12 @@ class WorkflowManager:
             definitions.append(definition)
 
         return definitions
+
+    def _apply_workflow_defaults_to_params(self, parameters, workflow_defaults: dict) -> None:
+        """Mark parameters that have workflow-level defaults as optional."""
+        for name, param in parameters.items():
+            if name in workflow_defaults:
+                param.required = False
 
     def render_workflow(self, definition: WorkflowToolDefinition, provided_params: Dict[str, Any], defaults_manager: Optional["DefaultsManager"] = None):
         from managers.defaults_manager import DefaultsManager
@@ -389,8 +401,12 @@ class WorkflowManager:
                     # Special handling for seed - generate random
                     raw_value = random.randint(0, 2**32 - 1)
                     logger.debug(f"Generated random seed: {raw_value}")
+                elif param.name in definition.defaults:
+                    # Workflow-specific defaults from .meta.json take priority
+                    raw_value = definition.defaults[param.name]
+                    logger.debug(f"Using workflow default for {param.name}: {raw_value}")
                 elif defaults_manager:
-                    # Use defaults manager to get value with proper precedence
+                    # Fall back to global defaults manager
                     raw_value = defaults_manager.get_default(namespace, param.name, None)
                     if raw_value is not None:
                         logger.debug(f"Using default value for {param.name}: {raw_value}")
@@ -517,7 +533,7 @@ class WorkflowManager:
             meta = self._load_workflow_metadata(workflow_path)
             if meta.get("description"):
                 return meta["description"]
-        
+
         # Fallback to generated description
         readable = stem.replace("_", " ").replace("-", " ").strip()
         readable = readable if readable else stem

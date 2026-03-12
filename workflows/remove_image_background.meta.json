@@ -1,0 +1,3 @@
+{
+  "description": "Remove the background from an image using the BRIA RMBG model. Accepts an input image and returns a PNG with the background removed (transparent)."
+}

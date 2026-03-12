@@ -103,6 +103,14 @@ class ComfyUIClient:
                 ),
             }
 
+        # Workflow completed but produced no capturable outputs (e.g. ConvertToGLB, file-save nodes)
+        if outputs == {}:
+            return {
+                "status": "completed",
+                "prompt_id": prompt_id,
+                "message": "Workflow completed successfully (output saved to disk, no capturable asset)",
+            }
+
         # Check if this is a text output workflow
         text_keys = ("text", "texts", "string", "strings")
         is_text_workflow = any(key in preferred_output_keys for key in text_keys)
@@ -250,6 +258,47 @@ class ComfyUIClient:
             raise Exception(f"Invalid response format from ComfyUI: {e}")
         logger.info(f"Queued workflow with prompt_id: {prompt_id}")
         return prompt_id
+
+    def _find_cached_outputs(self, prompt_data: dict) -> dict:
+        """Search ComfyUI history for outputs from a previous run with the same node IDs.
+
+        When a workflow is fully cached, the current prompt's outputs dict is empty.
+        This method scans the full history to find any earlier prompt that has non-empty
+        outputs containing the same output-node IDs, and returns those outputs.
+        """
+        try:
+            # Collect output node IDs from the submitted prompt
+            prompt_nodes = prompt_data.get("prompt", [])
+            # prompt is [index, prompt_id, nodes_dict, extra, output_node_ids]
+            if isinstance(prompt_nodes, list) and len(prompt_nodes) >= 5:
+                output_node_ids = set(str(n) for n in prompt_nodes[4])
+            elif isinstance(prompt_nodes, list) and len(prompt_nodes) >= 3:
+                output_node_ids = set(prompt_nodes[2].keys())
+            else:
+                return {}
+
+            if not output_node_ids:
+                return {}
+
+            response = requests.get(f"{self.base_url}/history", timeout=10)
+            if response.status_code != 200:
+                return {}
+            full_history = response.json()
+
+            # Scan history entries (newest first) for matching non-empty outputs
+            for pid, entry in reversed(list(full_history.items())):
+                if not isinstance(entry, dict):
+                    continue
+                hist_outputs = entry.get("outputs", {})
+                if not hist_outputs or not isinstance(hist_outputs, dict):
+                    continue
+                # Check if any of our output node IDs have outputs here
+                if output_node_ids.intersection(hist_outputs.keys()):
+                    logger.info("Found cached outputs in history prompt %s", pid)
+                    return hist_outputs
+        except Exception as e:
+            logger.debug("Error searching cached outputs: %s", e)
+        return {}
 
     @staticmethod
     def _has_status_message(messages, target: str) -> bool:
@@ -411,9 +460,14 @@ class ComfyUIClient:
                         raise Exception(f"Workflow execution failed: {node_errors}")
 
                     if self._has_status_message(messages, "execution_success"):
-                        logger.warning("Workflow succeeded but outputs empty. Waiting longer...")
-                        time.sleep(2)
-                        continue
+                        # Outputs empty — likely a fully-cached run.
+                        # Try to recover outputs from a previous prompt with the same node IDs.
+                        cached_outputs = self._find_cached_outputs(prompt_data)
+                        if cached_outputs:
+                            logger.info("Recovered outputs from cached history for prompt %s", prompt_id)
+                            return cached_outputs
+                        logger.info("Workflow completed with no capturable outputs (file-save-only workflow)")
+                        return {}
 
                     # Build diagnostic message from whatever status info we have
                     node_errors = self._extract_node_errors(prompt_data)

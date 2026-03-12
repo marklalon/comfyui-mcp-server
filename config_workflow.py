@@ -27,6 +27,8 @@ PLACEHOLDER_TYPE_HINTS = {
 # Input node type mapping: class_type -> {input_field: type}
 INPUT_NODE_MAPPING = {
     "LoadImage": {"image": str},
+    "PrimitiveInt": {"value": int},
+    "PrimitiveFloat": {"value": float},
     "PrimitiveString": {"value": str},
     "PrimitiveStringMultiline": {"value": str},
     "CLIPTextEncode": {"text": str},
@@ -85,12 +87,16 @@ NODE_TITLE_KEYWORDS = {
 }
 
 
+PRIMITIVE_NODE_TYPES = {"PrimitiveInt", "PrimitiveFloat", "PrimitiveString", "PrimitiveStringMultiline"}
+
+
 class WorkflowConfigurator:
     def __init__(self, workflows_dir: Path):
         self.workflows_dir = workflows_dir
         self.workflow: Dict[str, Any] = {}
         self.workflow_path: Optional[Path] = None
         self.changes: List[str] = []
+        self.collected_defaults: Dict[str, Any] = {}
 
     def discover_workflows(self) -> List[Path]:
         """Find all workflow JSON files in the workflows directory."""
@@ -327,15 +333,20 @@ class WorkflowConfigurator:
                 if choice == "n":
                     continue
 
-                # Determine parameter name:
-                # - First, check if downstream nodes reference this node with a specific input name
-                # - For text/value fields, try to extract keyword from node title FIRST (e.g., "Prompt" -> "prompt")
-                # - For common fields (seed, width, etc.), use field name as fallback
-                # - For other fields, use node title if available
+                # Determine parameter name priority:
+                # 1. Consumer input name (what downstream nodes call this input)
+                #    - Primitive nodes: always prefer consumer name (e.g. "target_count")
+                #    - Other nodes: only if it's a well-known field name
+                # 2. Keyword extracted from node title (e.g. "Prompt" -> "prompt")
+                # 3. Well-known field name (seed, width, height, etc.)
+                # 4. Node title normalized
+                # 5. Field name as fallback
                 consumer_input_name = self._find_consumer_input_name(node_id)
-                
-                if consumer_input_name and consumer_input_name in PREFER_FIELD_NAME:
-                    # Use the input name from the consumer node (e.g., "image2", "image3")
+
+                if class_type in PRIMITIVE_NODE_TYPES and consumer_input_name:
+                    # Primitive nodes: use the consumer's input name as it describes the purpose
+                    param_name = self._normalize_name(consumer_input_name)
+                elif consumer_input_name and consumer_input_name in PREFER_FIELD_NAME:
                     param_name = consumer_input_name
                 elif input_name in ("text", "value") and node_meta.get("title"):
                     # For text/value fields, try to extract keyword from node title FIRST
@@ -344,10 +355,8 @@ class WorkflowConfigurator:
                     extracted_name = self._extract_keyword_from_title(node_title)
                     if extracted_name:
                         param_name = extracted_name
-                    elif input_name in PREFER_FIELD_NAME:
-                        param_name = input_name
                     else:
-                        param_name = input_name
+                        param_name = self._normalize_name(node_title)
                 elif input_name in PREFER_FIELD_NAME:
                     param_name = input_name
                 else:
@@ -364,6 +373,12 @@ class WorkflowConfigurator:
                 self.workflow[node_id]["inputs"][input_name] = placeholder
                 self.changes.append(f"Input: {input_name} -> {placeholder}")
                 print(f"    -> Set to: {placeholder}")
+
+                # For Primitive nodes with a concrete current value, auto-save as default
+                if class_type in PRIMITIVE_NODE_TYPES and not isinstance(current_value, str):
+                    self.collected_defaults[param_name] = current_value
+                    self.changes.append(f"Default: {param_name} = {current_value!r}")
+                    print(f"    -> Default saved: {param_name} = {current_value!r}")
 
             except (EOFError, KeyboardInterrupt):
                 print("\n")
@@ -414,6 +429,24 @@ class WorkflowConfigurator:
             json.dump(self.workflow, f, indent=2, ensure_ascii=False)
 
         print(f"Saved: {self.workflow_path.name}")
+
+        # Write collected defaults to .meta.json
+        if self.collected_defaults:
+            meta_path = self.workflow_path.with_suffix(".meta.json")
+            meta: Dict[str, Any] = {}
+            if meta_path.exists():
+                try:
+                    with open(meta_path, "r", encoding="utf-8") as f:
+                        meta = json.load(f)
+                except (json.JSONDecodeError, IOError):
+                    pass
+            existing = meta.get("defaults", {})
+            existing.update(self.collected_defaults)
+            meta["defaults"] = existing
+            with open(meta_path, "w", encoding="utf-8") as f:
+                json.dump(meta, f, indent=2, ensure_ascii=False)
+            print(f"Saved defaults to: {meta_path.name}")
+
         return True
 
 

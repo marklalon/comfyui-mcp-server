@@ -1,0 +1,86 @@
+{
+  "24": {
+    "inputs": {
+      "filename_prefix": "mesh/textured_mesh",
+      "mesh": [
+        "32",
+        1
+      ],
+      "albedo_texture": [
+        "32",
+        2
+      ],
+      "metallic_texture": [
+        "32",
+        3
+      ],
+      "roughness_texture": [
+        "32",
+        4
+      ]
+    },
+    "class_type": "ConvertToGLB",
+    "_meta": {
+      "title": "Convert to GLB"
+    }
+  },
+  "27": {
+    "inputs": {
+      "image": "PARAM_IMAGE"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "Load Image"
+    }
+  },
+  "32": {
+    "inputs": {
+      "texture_size": [
+        "39",
+        0
+      ],
+      "image": [
+        "27",
+        0
+      ],
+      "mesh": [
+        "34",
+        1
+      ]
+    },
+    "class_type": "Hunyuan3DTexureSynthsis",
+    "_meta": {
+      "title": "Hunyuan3D Texure Synthsis"
+    }
+  },
+  "34": {
+    "inputs": {
+      "mesh_path": [
+        "38",
+        0
+      ]
+    },
+    "class_type": "Load3DMesh",
+    "_meta": {
+      "title": "Load 3D Mesh (OBJ/GLB/STL...)"
+    }
+  },
+  "38": {
+    "inputs": {
+      "value": "PARAM_MESH_PATH"
+    },
+    "class_type": "PrimitiveString",
+    "_meta": {
+      "title": "mesh_path"
+    }
+  },
+  "39": {
+    "inputs": {
+      "value": "PARAM_INT_TEXTURE_SIZE"
+    },
+    "class_type": "PrimitiveInt",
+    "_meta": {
+      "title": "target_count"
+    }
+  }
+}

@@ -33,8 +33,8 @@ def register_and_build_response(
         If the workflow is still running (timeout), returns a job handle dict instead.
         If the workflow produces text output, returns a text response dict.
     """
-    # If the result is a "still running" job handle, pass it through directly
-    if result.get("status") == "running":
+    # If the result is a job handle (running) or a no-output completion, pass through directly
+    if result.get("status") in ("running", "completed"):
         return result
 
     # Check if this is a text output workflow

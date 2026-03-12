@@ -1,0 +1,50 @@
+{
+  "1": {
+    "inputs": {
+      "model_path": "tencent/Hunyuan3D-2.1",
+      "device": "cuda"
+    },
+    "class_type": "LoadHunyuan3DModel",
+    "_meta": {
+      "title": "Load Hunyuan3D Model"
+    }
+  },
+  "4": {
+    "inputs": {
+      "model": [
+        "1",
+        0
+      ],
+      "image": [
+        "27",
+        0
+      ]
+    },
+    "class_type": "Hunyuan3DShapeGeneration",
+    "_meta": {
+      "title": "Hunyuan3D Shape Generation"
+    }
+  },
+  "27": {
+    "inputs": {
+      "image": "PARAM_IMAGE"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "Load Image"
+    }
+  },
+  "34": {
+    "inputs": {
+      "filename_prefix": "mesh/white_mesh",
+      "mesh": [
+        "4",
+        1
+      ]
+    },
+    "class_type": "ConvertToGLB",
+    "_meta": {
+      "title": "Convert to GLB"
+    }
+  }
+}

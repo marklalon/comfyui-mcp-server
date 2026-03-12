@@ -123,12 +123,16 @@ def register_job_tools(
                             "message": f"Job failed with error: {error_info}"
                         }
                     
-                    # Check if completed with outputs
-                    if "outputs" in prompt_data and prompt_data["outputs"]:
+                    # Check if ComfyUI reports the job as completed
+                    comfy_status = prompt_data.get("status", {})
+                    is_comfy_done = comfy_status.get("completed", False) and comfy_status.get("status_str") == "success"
+                    has_outputs = bool(prompt_data.get("outputs"))
+
+                    if has_outputs or is_comfy_done:
                         return {
                             "status": "completed",
                             "prompt_id": prompt_id,
-                            "outputs": prompt_data["outputs"],
+                            "outputs": prompt_data.get("outputs", {}),
                             "history": prompt_data,
                             "message": "Job completed successfully"
                         }

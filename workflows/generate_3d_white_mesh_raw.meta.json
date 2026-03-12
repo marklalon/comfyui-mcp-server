@@ -1,0 +1,3 @@
+{
+  "description": "Generate a 3D white mesh (GLB) from a single reference image. Produces an untextured mesh suitable for further processing such as texturing or mesh simplification."
+}

@@ -1,0 +1,76 @@
+{
+  "1": {
+    "inputs": {
+      "mesh_path": [
+        "8",
+        0
+      ]
+    },
+    "class_type": "Load3DMesh",
+    "_meta": {
+      "title": "Load 3D Mesh (OBJ/GLB/STL...)"
+    }
+  },
+  "2": {
+    "inputs": {
+      "target_count": [
+        "6",
+        0
+      ],
+      "mesh": [
+        "1",
+        1
+      ]
+    },
+    "class_type": "RemeshMesh",
+    "_meta": {
+      "title": "Remesh / Simplify Mesh"
+    }
+  },
+  "3": {
+    "inputs": {
+      "filename_prefix": "mesh/simplified_mesh",
+      "mesh": [
+        "7",
+        0
+      ]
+    },
+    "class_type": "ConvertToGLB",
+    "_meta": {
+      "title": "Convert to GLB"
+    }
+  },
+  "6": {
+    "inputs": {
+      "value": "PARAM_INT_TARGET_COUNT"
+    },
+    "class_type": "PrimitiveInt",
+    "_meta": {
+      "title": "target_count"
+    }
+  },
+  "7": {
+    "inputs": {
+      "auto_smooth_angle": 30,
+      "enable_uv_unwrap": false,
+      "uv_method": "smart_project",
+      "mesh": [
+        "2",
+        0
+      ]
+    },
+    "class_type": "BlenderMeshProcessor",
+    "_meta": {
+      "title": "Blender Mesh Processor (AutoSmooth + UV)"
+    }
+  },
+  "8": {
+    "inputs": {
+      "value": "PARAM_MESH_PATH"
+    },
+    "class_type": "PrimitiveString",
+    "_meta": {
+      "title": "mesh_path"
+    }
+  }
+}
