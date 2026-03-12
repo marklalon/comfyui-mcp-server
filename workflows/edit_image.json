@@ -1,7 +1,4 @@
 {
-  "_meta": {
-    "description": "Edit an image using Qwen-Image-Edit model with text instructions. Supports multiple reference images for guided editing. Accepts a text prompt describing the desired edit, a primary image, and optional additional reference images."
-  },
   "61": {
     "inputs": {
       "strength": 1,
