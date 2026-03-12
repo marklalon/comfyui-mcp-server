@@ -1,5 +1,5 @@
 {
-  "description": "Simplify a 3D mesh (OBJ/GLB/STL) to a lower polygon count and export as GLB. Accepts a mesh file path and an optional target polygon count (default: 10000).",
+  "description": "Reduce polygon count of a 3D mesh and export as GLB.",
   "defaults": {
     "decimate_ratio": 0.1
   }

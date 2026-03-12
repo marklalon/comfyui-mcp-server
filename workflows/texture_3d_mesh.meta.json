@@ -1,6 +1,16 @@
 {
-  "description": "Apply PBR textures to an existing 3D mesh using texture synthesis. Accepts a mesh file path and a reference image, with an optional texture_size parameter (default: 10000). Outputs a textured GLB file.",
+  "description": "Apply PBR textures to a 3D mesh using a reference image. Outputs a textured GLB.",
   "defaults": {
-    "texture_size": 10000
+    "texture_size": 2048,
+    "quality_preset": "default"
+  },
+  "constraints": {
+    "quality_preset": {
+      "enum": [
+        "default",
+        "high",
+        "ultra"
+      ]
+    }
   }
 }

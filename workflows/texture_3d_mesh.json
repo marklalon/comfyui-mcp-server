@@ -36,9 +36,10 @@
   "32": {
     "inputs": {
       "texture_size": [
-        "39",
+        "43",
         0
       ],
+      "quality_preset": "PARAM_QUALITY_PRESET",
       "image": [
         "41",
         0
@@ -74,15 +75,6 @@
       "title": "mesh_path"
     }
   },
-  "39": {
-    "inputs": {
-      "value": "PARAM_INT_TEXTURE_SIZE"
-    },
-    "class_type": "PrimitiveInt",
-    "_meta": {
-      "title": "target_count"
-    }
-  },
   "40": {
     "inputs": {},
     "class_type": "BRIA_RMBG_ModelLoader_Zho",
@@ -104,6 +96,15 @@
     "class_type": "BRIA_RMBG_Zho",
     "_meta": {
       "title": "🧹BRIA RMBG"
+    }
+  },
+  "43": {
+    "inputs": {
+      "value": "PARAM_INT_TEXTURE_SIZE"
+    },
+    "class_type": "PrimitiveInt",
+    "_meta": {
+      "title": "Int"
     }
   }
 }

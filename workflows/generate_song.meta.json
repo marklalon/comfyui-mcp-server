@@ -1,3 +1,3 @@
 {
-  "description": "Generate music from text using ACE-Step audio model. Accepts tags (genre/style descriptors), lyrics, and duration in seconds. Outputs an MP3 audio file."
+  "description": "Generate music from tags and lyrics. Outputs an MP3 file."
 }

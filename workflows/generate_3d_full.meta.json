@@ -1,7 +1,17 @@
 {
-  "description": "Generate a fully textured 3D mesh (GLB) from a single reference image. Performs shape generation, mesh simplification, UV unwrapping, and PBR texture synthesis in one pipeline. Accepts an image input with optional texture_size and target_count parameters.",
+  "description": "Generate a fully textured 3D mesh (GLB) from a reference image in one pipeline.",
   "defaults": {
     "texture_size": 2048,
-    "decimate_ratio": 0.1
+    "decimate_ratio": 0.1,
+    "quality_preset": "default"
+  },
+  "constraints": {
+    "quality_preset": {
+      "enum": [
+        "default",
+        "high",
+        "ultra"
+      ]
+    }
   }
 }

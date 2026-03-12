@@ -1,3 +1,3 @@
 {
-  "description": "Analyze and describe an image using vision-language model. Returns a text description of the image content. Accepts an image input and an optional custom prompt to guide the description."
+  "description": "Describe image content using a vision-language model. Returns a text description."
 }

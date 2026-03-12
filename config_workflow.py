@@ -68,6 +68,7 @@ FIELD_TYPE_INFERENCE = {
     "prompt": str,
     "image": str,
     "value": str,
+    "quality_preset": str,
 }
 
 # Fields that should always use field name (not node title) for parameter name
@@ -75,6 +76,12 @@ PREFER_FIELD_NAME = {
     "seed", "prompt", "text",
     "width", "height", "batch_size", "fps", "duration", "seconds",
     "image", "image2", "image3",
+    "quality_preset",
+}
+
+# Enum constraints for known combo-type fields: field_name -> allowed values
+FIELD_ENUM_CONSTRAINTS: Dict[str, List[str]] = {
+    "quality_preset": ["default", "high", "ultra"],
 }
 
 # Keywords to extract from node titles for parameter naming
@@ -97,6 +104,7 @@ class WorkflowConfigurator:
         self.workflow_path: Optional[Path] = None
         self.changes: List[str] = []
         self.collected_defaults: Dict[str, Any] = {}
+        self.collected_constraints: Dict[str, Any] = {}
 
     def discover_workflows(self) -> List[Path]:
         """Find all workflow JSON files in the workflows directory."""
@@ -374,11 +382,22 @@ class WorkflowConfigurator:
                 self.changes.append(f"Input: {input_name} -> {placeholder}")
                 print(f"    -> Set to: {placeholder}")
 
-                # For Primitive nodes with a concrete current value, auto-save as default
+                # Save default value
                 if class_type in PRIMITIVE_NODE_TYPES and not isinstance(current_value, str):
+                    # Primitive nodes: auto-save current value as default
                     self.collected_defaults[param_name] = current_value
                     self.changes.append(f"Default: {param_name} = {current_value!r}")
                     print(f"    -> Default saved: {param_name} = {current_value!r}")
+                elif input_name in FIELD_ENUM_CONSTRAINTS:
+                    # Enum fields: auto-save current value (or first option) as default, save constraints
+                    enum_values = FIELD_ENUM_CONSTRAINTS[input_name]
+                    default_value = current_value if current_value in enum_values else enum_values[0]
+                    self.collected_defaults[param_name] = default_value
+                    self.changes.append(f"Default: {param_name} = {default_value!r}")
+                    print(f"    -> Default saved: {param_name} = {default_value!r}")
+                    self.collected_constraints[param_name] = {"enum": enum_values}
+                    self.changes.append(f"Constraint: {param_name} enum = {enum_values}")
+                    print(f"    -> Enum constraint saved: {enum_values}")
 
             except (EOFError, KeyboardInterrupt):
                 print("\n")
@@ -430,8 +449,8 @@ class WorkflowConfigurator:
 
         print(f"Saved: {self.workflow_path.name}")
 
-        # Write collected defaults to .meta.json
-        if self.collected_defaults:
+        # Write collected defaults and constraints to .meta.json
+        if self.collected_defaults or self.collected_constraints:
             meta_path = self.workflow_path.with_suffix(".meta.json")
             meta: Dict[str, Any] = {}
             if meta_path.exists():
@@ -440,12 +459,17 @@ class WorkflowConfigurator:
                         meta = json.load(f)
                 except (json.JSONDecodeError, IOError):
                     pass
-            existing = meta.get("defaults", {})
-            existing.update(self.collected_defaults)
-            meta["defaults"] = existing
+            if self.collected_defaults:
+                existing = meta.get("defaults", {})
+                existing.update(self.collected_defaults)
+                meta["defaults"] = existing
+            if self.collected_constraints:
+                existing_constraints = meta.get("constraints", {})
+                existing_constraints.update(self.collected_constraints)
+                meta["constraints"] = existing_constraints
             with open(meta_path, "w", encoding="utf-8") as f:
                 json.dump(meta, f, indent=2, ensure_ascii=False)
-            print(f"Saved defaults to: {meta_path.name}")
+            print(f"Saved defaults/constraints to: {meta_path.name}")
 
         return True
 
