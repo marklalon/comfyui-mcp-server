@@ -40,7 +40,7 @@
         0
       ],
       "image": [
-        "27",
+        "41",
         0
       ],
       "mesh": [
@@ -81,6 +81,29 @@
     "class_type": "PrimitiveInt",
     "_meta": {
       "title": "target_count"
+    }
+  },
+  "40": {
+    "inputs": {},
+    "class_type": "BRIA_RMBG_ModelLoader_Zho",
+    "_meta": {
+      "title": "🧹BRIA_RMBG Model Loader"
+    }
+  },
+  "41": {
+    "inputs": {
+      "rmbgmodel": [
+        "40",
+        0
+      ],
+      "image": [
+        "27",
+        0
+      ]
+    },
+    "class_type": "BRIA_RMBG_Zho",
+    "_meta": {
+      "title": "🧹BRIA RMBG"
     }
   }
 }
