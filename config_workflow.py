@@ -68,7 +68,6 @@ FIELD_TYPE_INFERENCE = {
     "prompt": str,
     "image": str,
     "value": str,
-    "quality_preset": str,
 }
 
 # Fields that should always use field name (not node title) for parameter name
@@ -76,13 +75,10 @@ PREFER_FIELD_NAME = {
     "seed", "prompt", "text",
     "width", "height", "batch_size", "fps", "duration", "seconds",
     "image", "image2", "image3",
-    "quality_preset",
 }
 
 # Enum constraints for known combo-type fields: field_name -> allowed values
-FIELD_ENUM_CONSTRAINTS: Dict[str, List[str]] = {
-    "quality_preset": ["default", "high", "ultra"],
-}
+FIELD_ENUM_CONSTRAINTS: Dict[str, List[str]] = {}
 
 # Keywords to extract from node titles for parameter naming
 # Maps keyword (lowercase) to preferred parameter name

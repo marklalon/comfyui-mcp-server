@@ -194,6 +194,20 @@ class ComfyUIClient:
                             metadata["mime_type"] = "video/mp4"
                         elif filename.endswith((".gif", ".GIF")):
                             metadata["mime_type"] = "image/gif"
+                        elif filename.endswith((".glb", ".GLB")):
+                            metadata["mime_type"] = "model/gltf-binary"
+                        elif filename.endswith((".gltf", ".GLTF")):
+                            metadata["mime_type"] = "model/gltf+json"
+                        elif filename.endswith((".obj", ".OBJ")):
+                            metadata["mime_type"] = "model/obj"
+                        elif filename.endswith((".stl", ".STL")):
+                            metadata["mime_type"] = "model/stl"
+                        elif filename.endswith((".ply", ".PLY")):
+                            metadata["mime_type"] = "application/octet-stream"
+                        elif filename.endswith((".3mf", ".3MF")):
+                            metadata["mime_type"] = "model/3mf"
+                        elif filename.endswith((".dae", ".DAE")):
+                            metadata["mime_type"] = "model/vnd.collada+xml"
                         break
         
         # Extract dimensions from workflow (EmptyLatentImage node) - much more efficient than analyzing image
